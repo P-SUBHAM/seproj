@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 #include<ctime>
 using namespace std;
-
+///////////////////////////////////////////////
 int setwsize = 30;
 int dashsize = 60;
 
@@ -11,6 +11,7 @@ time_t timenow() {
     return t;
 }
 
+////////////////////////////////////////////////
 class truck {
     public:
     int id;
@@ -36,12 +37,16 @@ class truck {
         cout<<"Capacity: "<<capacity<<" Speed: "<<speed<<" Time: "<< ctime(&time);
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
     }
+
+
 };
+//////////////////////////////////////////////////
 
 vector<truck> trucks;
 
-int managermenu() {
-    cout<<"\n\n1. Add truck\n2. Remove truck\n3. Print all trucksv\n4. Exit\n";
+/////////////////////////////////////////////////
+int managermenuinp() {
+    cout<<"\n\n1. Add truck\n2. Remove truck\n3. Print all trucksv\n4. BACK\n5. EXIT\n";
     int choice;
     cin>>choice;
     cout<<"\n";
@@ -62,9 +67,13 @@ int managermenu() {
             return 4;
             break;
         }
+        case 5: {
+            return 5;
+            break;
+        }
         default: {
             cout<<"Invalid choice\n";
-            return managermenu();
+            return managermenuinp();
         }
     }
 }
@@ -129,14 +138,8 @@ void saveinfo() {
     }
 }
 
-int main() 
-{
-    loadinfo();
-    
-
-    while(true) {
-        int choice = managermenu();
-        switch(choice) {
+void managermenu(int choice) {
+    switch(choice) {
             case 1: {
                 addtruck();
                 break;
@@ -150,15 +153,47 @@ int main()
                 break;
             }
             case 4: {
-                cout<<"saving updates\n";
-                saveinfo();
-                cout<<"Saved info\n";
-                cout<<"Exiting\n";
-                cout<<"logging out\n";
-                return 0;
+                //goback(); //TO DO TO-IMPLEMENT
+                break;
+            }
+            case 5: {
+                return;
+            }
+            default: {
+                cout<<"Invalid choice\n";
+                return managermenu(managermenuinp());
             }
         }
-        
+} 
+
+int main() 
+{
+    loadinfo();
+    int userno = LOGINPAGEdis();
+    if(userno == 1) {
+        int choice = managermenuinp();
+        managermenu(choice);
+        if(choice == 4) break;
+        if(choice == 5) {saveinfo(); return 0;}
     }
+    else if(userno == 2) {
+        int choice = clerkmenuinp();
+        managermenu(choice);
+        if(choice == 4) break;
+        if(choice == 5) {saveinfo(); return 0;}
+    }
+    else {
+        cout<<"Invalid user\n";
+        return 0;
+    }
+
+    }
+
+    cout<<"saving updates\n";
+    saveinfo();
+    cout<<"Saved info\n";
+    cout<<"Exiting\n";
+    cout<<"logging out\n";
+
     return 0;
 }
