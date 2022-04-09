@@ -2,6 +2,9 @@
 #include<ctime>
 using namespace std;
 
+int setwsize = 30;
+int dashsize = 60;
+
 time_t timenow() {
     time_t t;
     time(&t);
@@ -23,6 +26,15 @@ class truck {
         } else {
             time = stol(t);
         }
+    }
+    void displaytruckinfo() {
+        cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
+        cout<<setw(setwsize);
+        cout<<"| Truck "<<id<<" |";cout<<endl;
+        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
+        //cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
+        cout<<"Capacity: "<<capacity<<" Speed: "<<speed<<" Time: "<< ctime(&time);
+        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
     }
 };
 
@@ -78,10 +90,11 @@ void removetruck() {
        
 void printalltrucks() {
     for(int i = 0; i < trucks.size(); i++) {
-        cout<<"Truck "<<trucks[i].id<<"\n";
-        cout<<"-----------\n";
-        cout<<"Capacity: "<<trucks[i].capacity<<" Speed: "<<trucks[i].speed<<" Time: "<<trucks[i].time<<"\n";
-        cout<<"----------------------\n";
+        trucks[i].displaytruckinfo();
+        // cout<<"Truck "<<trucks[i].id<<"\n";
+        // cout<<"-----------\n";
+        // cout<<"Capacity: "<<trucks[i].capacity<<" Speed: "<<trucks[i].speed<<" Time: "<<trucks[i].time<<"\n";
+        // cout<<"----------------------\n";
     }
 }
 
