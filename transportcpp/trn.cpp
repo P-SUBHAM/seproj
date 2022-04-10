@@ -169,24 +169,12 @@ void managermenu(int choice) {
 int main() 
 {
     loadinfo();
-    int userno = LOGINPAGEdis();
-    if(userno == 1) {
+    
+    while(true) {
         int choice = managermenuinp();
         managermenu(choice);
         if(choice == 4) break;
         if(choice == 5) {saveinfo(); return 0;}
-    }
-    else if(userno == 2) {
-        int choice = clerkmenuinp();
-        managermenu(choice);
-        if(choice == 4) break;
-        if(choice == 5) {saveinfo(); return 0;}
-    }
-    else {
-        cout<<"Invalid user\n";
-        return 0;
-    }
-
     }
 
     cout<<"saving updates\n";
