@@ -11,6 +11,51 @@ time_t timenow() {
     return t;
 }
 
+map<string,pair<double,double>> citydistance;
+
+////////////////////////////////////////////////
+
+double toRadians(const double degree)
+{
+    // cmath library in C++
+    // defines the constant
+    // M_PI as the value of
+    // pi accurate to 1e-30
+    double one_deg = (M_PI) / 180;
+    return (one_deg * degree);
+}
+ 
+double distancebetcity(double lat1, double long1,double lat2, double long2)
+{
+    // Convert the latitudes
+    // and longitudes
+    // from degree to radians.
+    lat1 = toRadians(lat1);
+    long1 = toRadians(long1);
+    lat2 = toRadians(lat2);
+    long2 = toRadians(long2);
+     
+    // Haversine Formula
+    double dlong = long2 - long1;
+    double dlat = lat2 - lat1;
+ 
+    double ans = pow(sin(dlat / 2), 2) +
+                          cos(lat1) * cos(lat2) *
+                          pow(sin(dlong / 2), 2);
+ 
+    ans = 2 * asin(sqrt(ans));
+ 
+    // Radius of Earth in
+    // Kilometers, R = 6371
+    // Use R = 3956 for miles
+    double R = 6371;
+     
+    // Calculate the result
+    ans = ans * R;
+ 
+    return ans;
+}
+
 ////////////////////////////////////////////////
 class truck {
     public:
@@ -42,11 +87,58 @@ class truck {
 };
 
 
+class consignment {
+    public:
+    int cid;
+    int volume;
+    string destadd;
+    string sendadd;
+    int charge;
+    double distance;
+    string billoc;
+    void generateDispatchSlip() {
+        fstream billfile;
+        billfile.open(billoc, ios::out);
+        billfile<<"Consignment "<<cid<<"\n";
+        billfile<<"Volume: "<<volume<<"\n";
+        billfile<<"Destination Address: "<<destadd<<"\n";
+        billfile<<"Source Address: "<<sendadd<<"\n";
+        billfile<<"Charge: "<<charge<<"\n";
+        billfile.close();
+    }
+    consignment(int i, int vol, string dadd, string sadd) {
+        cid = i;
+        volume = vol;
+        destadd = dadd;
+        transform(destadd.begin(), destadd.end(), destadd.begin(), ::tolower);
+        sendadd = sadd;
+        transform(sendadd.begin(), sendadd.end(), sendadd.begin(), ::tolower);
+        distance = (int)distancebetcity(citydistance[sendadd].first,citydistance[sendadd].second, citydistance[destadd].first,citydistance[destadd].second);
+        charge = (int)distance*volume;
+        billoc = "db/bill/bill"+to_string(cid)+".txt";
+        generateDispatchSlip();
+    }
+    void displayconsignmentinfo() {
+        cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
+        cout<<setw(setwsize);
+        cout<<"| Consignment "<<cid<<" |";cout<<endl;
+        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
+        cout<<"Volume: "<<volume<<" \nDestination Address: "<<destadd<<"\n";
+        cout<<"Source Address: "<<sendadd<<"\n";
+        cout<<"Charge: Rs."<<charge<<" \n";
+        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
+    }
+    
+
+};
+
 //////////////////////////////////////////////////
 
 vector<truck> trucks;
+vector<consignment> consignments;
 map<string,string> mgrpsswd;
 map<string,string> clkpsswd;
+
 
 /////////////////////////////////////////////////
 bool authenticate(string usrtype, string username, string password) {
@@ -198,6 +290,8 @@ void addtruck() {
     trucks.push_back(truck(id, capacity, speed));
 }
 
+
+
 void removetruck() {
     int id;
     cout<<"Enter id of truck to be removed\n";
@@ -217,6 +311,23 @@ void printalltrucks() {
         // cout<<"-----------\n";
         // cout<<"Capacity: "<<trucks[i].capacity<<" Speed: "<<trucks[i].speed<<" Time: "<<trucks[i].time<<"\n";
         // cout<<"----------------------\n";
+    }
+}
+
+void viewconsignment() {
+    int id;
+    cout<<"Enter id of consignment to be viewed\n";
+    cin >> id;
+    bool found = false;
+    for(int i = 0; i < consignments.size(); i++) {
+        if(consignments[i].cid == id) {
+            found = true;
+            consignments[i].displayconsignmentinfo();
+            break;
+        }
+    }
+    if(!found) {
+        cout<<"Consignment not found\n";
     }
 }
 
@@ -258,6 +369,45 @@ void loadinfo() {
             clkpsswd[username] = password;
         }
     }
+    /////////////////////////////////// CITY DISTANCE ///////////////////////////////////////////////
+    fstream citydistancefile;
+    citydistancefile.open("db/citydistance.txt", ios::in);
+    if(!citydistancefile) {
+        cout<<"File not found citydistance 1\n";
+        return;
+    }
+    string line2;
+    while(getline(citydistancefile, line2)) {
+        stringstream ss2(line2);
+        string city, l1, l2;
+        getline(ss2, city, ',');
+        getline(ss2, l1, ',');
+        getline(ss2, l2);
+        double lat = stod(l1);
+        double lon = stod(l2);
+        citydistance[city] = make_pair(lat, lon);
+    }
+
+    /////////////////////////////////// CONSIGMENT ///////////////////////////////////////////////
+    fstream consignmentfile;
+    consignmentfile.open("db/consignmentdb.txt", ios::in);
+    if(!consignmentfile) {
+        cout<<"File not found consignmentdb 1\n";
+        return;
+    }
+    string line3;
+    while(getline(consignmentfile, line3)) {
+        stringstream ss3(line3);
+        string cid, vol, dest, source, charge, distance;
+        getline(ss3, cid, ',');
+        getline(ss3, vol, ',');
+        getline(ss3, dest, ',');
+        getline(ss3, source, ',');
+        getline(ss3, charge, ',');
+        getline(ss3, distance);
+        consignments.push_back(consignment(stoi(cid), stoi(vol), dest, source));
+    }
+
 }
 
 void saveinfo() {
@@ -271,6 +421,25 @@ void saveinfo() {
     for(int i = 0; i < trucks.size(); i++) {
         truckfile<<trucks[i].id<<","<<trucks[i].capacity<<","<<trucks[i].speed<<","<<trucks[i].time<<"\n";
     }
+
+    fstream consignmentfile;
+    consignmentfile.open("db/consignmentdb.txt", ios::out);
+    if(!consignmentfile) {
+        cout<<"File not found consignmentdb 2\n";
+        return;
+    }
+    for(int i = 0; i < consignments.size(); i++) {
+        consignmentfile<<consignments[i].cid<<","<<consignments[i].volume<<","<<consignments[i].destadd<<","<<consignments[i].sendadd<<","<<consignments[i].charge<<","<<consignments[i].distance<<"\n";
+    }
+
+
+}
+
+void registerconsignment() {
+    int id, vol; string source, destination;
+    cout<<"Enter id, vol, source, destination\n";
+    cin >> id >> vol >> source >> destination;
+    consignments.push_back(consignment(id, vol, source, destination));
 }
 
 void managermenu(int choice) {
@@ -303,13 +472,11 @@ void managermenu(int choice) {
 void clerkmenu(int choice) {
     switch(choice) {
             case 1: {
-                //regsiterconsignment();
-                cout<<"TO-DO Register Consignment\n";
+                registerconsignment();
                 break;
             }
             case 2: {
-                //generateDispatchSlip();
-                cout<<"TO-DO Dispatch Slip\n";
+                viewconsignment();
                 break;
             }
             case 3: {
@@ -356,3 +523,5 @@ int main()
 
     return 0;
 }
+
+// LAST MODIFIED: 10/04/2022 15:36

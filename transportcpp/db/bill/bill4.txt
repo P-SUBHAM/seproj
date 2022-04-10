@@ -1,0 +1,5 @@
+Consignment 4
+Volume: 230
+Destination Address: kolkata
+Source Address: delhi
+Charge: 0

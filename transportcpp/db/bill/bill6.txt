@@ -1,0 +1,5 @@
+Consignment 6
+Volume: 270
+Destination Address: bhubaneswar
+Source Address: chennai
+Charge: 0

@@ -1,0 +1,6 @@
+1,200,kolkata,mumbai,0,0
+2,150,mumbai,kolkata,0,0
+3,180,bhubaneswar,mumbai,0,0
+5,200,bhubaneswar,delhi,0,0
+4,230,kolkata,delhi,0,0
+6,270,bhubaneswar,chennai,0,0
