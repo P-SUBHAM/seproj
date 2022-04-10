@@ -83,3 +83,23 @@
 // #include <algorithm>
 // #include <math.h>
 // #include <iostream>
+
+class consignment {
+    public:
+    int cid;
+    int volume;
+    string destadd;
+    string sendadd;
+    int charge;
+    string billoc;
+    consignment(int i, int vol, string dadd, string sadd) {
+        cid = i;
+        volume = vol;
+        destadd = dadd;
+        sendadd = sadd;
+        charge = 0;
+        billoc = "db/bill"+to_string(cid)+".txt";
+
+    }
+
+}
