@@ -1,0 +1,5 @@
+@ECHO OFF
+
+@REM cd ..
+g++ trn.cpp -o trn.exe
+trn.exe
