@@ -2,4 +2,4 @@ Consignment 1
 Volume: 200
 Destination Address: kolkata
 Source Address: mumbai
-Charge: 0
+Charge: 46268

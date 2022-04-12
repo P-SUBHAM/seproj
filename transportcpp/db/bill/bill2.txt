@@ -1,5 +1,5 @@
 Consignment 2
-Volume: 150
-Destination Address: mumbai
-Source Address: kolkata
-Charge: 0
+Volume: 200
+Destination Address: kolkata
+Source Address: chennai
+Charge: 44188

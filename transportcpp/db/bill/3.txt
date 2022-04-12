@@ -1,5 +1,0 @@
-Consignment 3
-Volume: 180
-Destination Address: bhubaneswar
-Source Address: mumbai
-Charge: 0

@@ -1,5 +1,5 @@
 Consignment 4
-Volume: 230
-Destination Address: kolkata
+Volume: 560
+Destination Address: bhubaneswar
 Source Address: delhi
-Charge: 0
+Charge: 143883

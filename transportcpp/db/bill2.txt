@@ -1,5 +1,0 @@
-Consignment 2
-Volume: 150
-Destination Address: mumbai
-Source Address: kolkata
-Charge: 0

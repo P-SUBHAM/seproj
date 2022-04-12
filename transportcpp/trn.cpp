@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+#include<string.h>
 #include<ctime>
 using namespace std;
 ///////////////////////////////////////////////
@@ -14,6 +15,8 @@ time_t timenow() {
 map<string,pair<double,double>> citydistance;
 
 ////////////////////////////////////////////////
+
+void saveinfo();
 
 double toRadians(const double degree)
 {
@@ -63,7 +66,9 @@ class truck {
     int capacity;
     int speed;
     time_t time;
-    truck(int i, int c, int s, string t="") {
+    int distance;
+    string locationtruck;
+    truck(int i, int c, int s,string loc = "delhi", int dist = 0, string t="") {
         id = i;
         capacity = c;
         speed = s;
@@ -72,6 +77,8 @@ class truck {
         } else {
             time = stol(t);
         }
+        locationtruck = loc;
+        distance = dist;
     }
     void displaytruckinfo() {
         cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
@@ -79,8 +86,9 @@ class truck {
         cout<<"| Truck "<<id<<" |";cout<<endl;
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
         //cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
-        cout<<"Capacity: "<<capacity<<" Speed: "<<speed<<" Time: "<< ctime(&time);
-        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
+        cout<<"Capacity: "<<capacity<<" Speed: "<<speed<<" Location: "<<locationtruck<<"\n";
+        cout<<"Distance: "<<distance<<" Time: "<< ctime(&time);
+        for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}  cout<<"\n";
     }
 
 
@@ -113,19 +121,20 @@ class consignment {
         transform(destadd.begin(), destadd.end(), destadd.begin(), ::tolower);
         sendadd = sadd;
         transform(sendadd.begin(), sendadd.end(), sendadd.begin(), ::tolower);
-        distance = (int)distancebetcity(citydistance[sendadd].first,citydistance[sendadd].second, citydistance[destadd].first,citydistance[destadd].second);
-        charge = (int)distance*volume;
+        distance = distancebetcity(citydistance[sendadd].first,citydistance[sendadd].second, citydistance[destadd].first,citydistance[destadd].second);
+        charge = distance*volume/5;
         billoc = "db/bill/bill"+to_string(cid)+".txt";
         generateDispatchSlip();
     }
     void displayconsignmentinfo() {
+        generateDispatchSlip();
         cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
         cout<<setw(setwsize);
         cout<<"| Consignment "<<cid<<" |";cout<<endl;
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
         cout<<"Volume: "<<volume<<" \nDestination Address: "<<destadd<<"\n";
         cout<<"Source Address: "<<sendadd<<"\n";
-        cout<<"Charge: Rs."<<charge<<" \n";
+        cout<<"Distance: "<<distance<<"\nCharge: "<<charge<<"\n";
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
     }
     
@@ -284,10 +293,17 @@ int loginmenuinp() {
 }
 
 void addtruck() {
-    int id, capacity, speed; int time;
-    cout<<"Enter id, capacity, speed\n";
-    cin >> id >> capacity >> speed;
-    trucks.push_back(truck(id, capacity, speed));
+    int id, capacity, speed; int time; string loc;
+    cout<<"Enter id, capacity, speed, location\n";
+    cin >> id >> capacity >> speed >> loc;
+    for(int i = 0; i < trucks.size(); i++) {
+        if(trucks[i].id == id) {
+            cout<<"Truck with id "<<id<<" already exists\n";
+            return;
+        }
+    }
+    trucks.push_back(truck(id, capacity, speed, loc));
+    saveinfo();
 }
 
 
@@ -299,9 +315,13 @@ void removetruck() {
     for(int i = 0; i < trucks.size(); i++) {
         if(trucks[i].id == id) {
             trucks.erase(trucks.begin() + i);
+            cout<<"Truck with id "<<id<<" removed\n";
+            saveinfo();
             break;
         }
     }
+    cout<<"Truck with id "<<id<<" not found\n";
+    saveinfo();
 }
        
 void printalltrucks() {
@@ -341,13 +361,18 @@ void loadinfo() {
     }
     string line;
     while(getline(truckfile, line)) {
+        if(line.size() == 0) {
+            continue;
+        }
         stringstream ss(line);
-        string id, capacity, speed, time;
+        string id, capacity, speed, loc, distance, time;
         getline(ss, id, ',');
         getline(ss, capacity, ',');
         getline(ss, speed, ',');
+        getline(ss, loc, ',');
+        getline(ss, distance, ',');
         getline(ss, time);
-        trucks.push_back(truck(stoi(id), stoi(capacity), stoi(speed), time));
+        trucks.push_back(truck(stoi(id), stoi(capacity), stoi(speed),loc,stoi(distance), time));
     }
     /////////////////////////////////// PASSWORD ///////////////////////////////////////////////
     fstream passwordfile;
@@ -398,6 +423,7 @@ void loadinfo() {
     string line3;
     while(getline(consignmentfile, line3)) {
         stringstream ss3(line3);
+        if(line3.size() == 0) continue;
         string cid, vol, dest, source, charge, distance;
         getline(ss3, cid, ',');
         getline(ss3, vol, ',');
@@ -419,7 +445,7 @@ void saveinfo() {
         return;
     }
     for(int i = 0; i < trucks.size(); i++) {
-        truckfile<<trucks[i].id<<","<<trucks[i].capacity<<","<<trucks[i].speed<<","<<trucks[i].time<<"\n";
+        truckfile<<trucks[i].id<<","<<trucks[i].capacity<<","<<trucks[i].speed<<","<<trucks[i].locationtruck<<","<<trucks[i].distance<<","<<trucks[i].time<<"\n";
     }
 
     fstream consignmentfile;
@@ -440,6 +466,7 @@ void registerconsignment() {
     cout<<"Enter id, vol, source, destination\n";
     cin >> id >> vol >> source >> destination;
     consignments.push_back(consignment(id, vol, source, destination));
+    saveinfo();
 }
 
 void managermenu(int choice) {
@@ -495,6 +522,13 @@ void clerkmenu(int choice) {
 int main() 
 {
     loadinfo();
+    ////////////    TESTING    ////////////
+    cout<<"-----------------TESTING STARTS------------------\n";
+    for(auto it: citydistance) {
+        cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<"\n";
+    }
+    cout<<"-----------------TESTING ENDS------------------\n";
+    ////////////    TESTING    ////////////
     int cno=0; // cno = 0 means login page() auth
     while(cno!=3) {
         if(cno == 0) cno = loginmenuinp();
@@ -524,4 +558,4 @@ int main()
     return 0;
 }
 
-// LAST MODIFIED: 10/04/2022 15:36
+// LAST MODIFIED: 11/04/2022 10:50
