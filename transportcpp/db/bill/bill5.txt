@@ -1,0 +1,5 @@
+Consignment 5
+Volume: 200
+Destination Address: delhi
+Source Address: bhubaneswar
+Charge: 51387

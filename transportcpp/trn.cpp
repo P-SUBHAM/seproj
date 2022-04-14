@@ -34,6 +34,10 @@ void saveinfo();
 void registerconsignment();
 void managermenu(int choice);
 void clerkmenu(int choice);
+// void transactmove(consignment c);
+// void transactupdate(vector<consignment> c);
+void updatetransactiondb();
+// void updatelocationtruck(truck trucks[togo]);
 
 ////////////////////////////////////////////////
 
@@ -87,6 +91,7 @@ class truck {
     time_t time;
     int distance;
     string locationtruck;
+    int duration;
     truck(int i, int c, int s,string loc = "delhi", int dist = 0, string t="") {
         id = i;
         capacity = c;
@@ -106,7 +111,8 @@ class truck {
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}    cout<<"\n";
         //cout<<setw(setwsize);cout<<"--------"<<"---"<<setw(setwsize)<<"\n";
         cout<<"Capacity: "<<capacity<<" Speed: "<<speed<<" Location: "<<locationtruck<<"\n";
-        cout<<"Distance: "<<distance<<" Time: "<< ctime(&time);
+        time_t currt = time + distance/speed;
+        cout<<"Distance: "<<distance<<" Time: "<< ctime(&currt);
         for(int tempi = 0; tempi < dashsize; tempi++) {cout<<"-";}  cout<<"\n";
     }
 
@@ -123,6 +129,10 @@ class consignment {
     int charge;
     double distance;
     string billoc;
+    time_t time;
+    int waittime;
+    int truckid = -1; //
+    string status = "pending"; //
     void generateDispatchSlip() {
         fstream billfile;
         billfile.open(billoc, ios::out);
@@ -133,7 +143,7 @@ class consignment {
         billfile<<"Charge: "<<charge<<"\n";
         billfile.close();
     }
-    consignment(int i, int vol, string dadd, string sadd) {
+    consignment(int i, int vol, string dadd, string sadd, string t = "", string wtt = "") {
         cid = i;
         volume = vol;
         destadd = dadd;
@@ -143,6 +153,16 @@ class consignment {
         distance = distancebetcity(citydistance[sendadd].first,citydistance[sendadd].second, citydistance[destadd].first,citydistance[destadd].second);
         charge = distance*volume/5;
         billoc = "db/bill/bill"+to_string(cid)+".txt";
+        if(t=="") {
+            time = timenow();
+        } else {
+            time = stol(t);
+        }
+        if(wtt == "") {
+            waittime = 0;
+        } else {
+            waittime = stoi(wtt);
+        }
         generateDispatchSlip();
     }
     void displayconsignmentinfo() {
@@ -164,8 +184,10 @@ class consignment {
 
 vector<truck> trucks;
 vector<consignment> consignments;
+vector<consignment> consignmentsdelivered;
 map<string,string> mgrpsswd;
 map<string,string> clkpsswd;
+map<string,int> loads;
 
 
 /////////////////////////////////////////////////
@@ -443,16 +465,148 @@ void loadinfo() {
     while(getline(consignmentfile, line3)) {
         stringstream ss3(line3);
         if(line3.size() == 0) continue;
-        string cid, vol, dest, source, charge, distance;
+        string cid, vol, dest, source,charge,distance, timev, wttime;
         getline(ss3, cid, ',');
         getline(ss3, vol, ',');
         getline(ss3, dest, ',');
         getline(ss3, source, ',');
         getline(ss3, charge, ',');
-        getline(ss3, distance);
-        consignments.push_back(consignment(stoi(cid), stoi(vol), dest, source));
+        getline(ss3, distance, ',');
+        getline(ss3, timev, ',');
+        getline(ss3, wttime);
+        consignments.push_back(consignment(stoi(cid), stoi(vol), dest, source, timev, wttime));
     }
+    /////////////////////////////////// LOAD ///////////////////////////////////////////////
+    for(int i = 0; i < consignments.size(); i++) {
+        loads[consignments[i].sendadd] += consignments[i].volume;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
+}
+
+void updatetransactiondb() {
+    //copy content of all deliveredconsignments into transaction.txt
+    fstream transactionfile;
+    transactionfile.open("db/transaction.txt", ios::out);
+    if(!transactionfile) {
+        cout<<"File not found transaction 1\n";
+        return;
+    }
+    for(int i = 0; i < consignmentsdelivered.size(); i++) {
+        transactionfile<<consignmentsdelivered[i].cid<<","<<consignmentsdelivered[i].volume<<","<<consignmentsdelivered[i].destadd<<","<<consignmentsdelivered[i].sendadd<<","<<consignmentsdelivered[i].charge<<","<<consignmentsdelivered[i].distance<<","<<consignmentsdelivered[i].time<<","<<consignmentsdelivered[i].waittime<<"\n";
+    }
+    // for(int i = 0; i < deliveredconsignments.size(); i++) {
+    //     transactionfile<<deliveredconsignments[i].id<<","<<deliveredconsignments[i].volume<<","<<deliveredconsignments[i].dest<<","<<deliveredconsignments[i].source<<","<<deliveredconsignments[i].charge<<","<<deliveredconsignments[i].distance<<","<<deliveredconsignments[i].time<<","<<deliveredconsignments[i].waittime<<"\n";
+    // }
+}
+
+void updatelocationtruck(truck trucksv1) {
+    //append details of trucksv1 to db/location.txt
+    fstream locationfile;
+    locationfile.open("db/location.txt", ios::app);
+    if(!locationfile) {
+        cout<<"File not found location 1\n";
+        return;
+    }
+    locationfile<<trucksv1.id<<","<<trucksv1.locationtruck<<","<<trucksv1.time<<"\n";
+}
+
+void transactupdate(vector<consignment> congstage) {
+    int tempdur = 0;
+    string source = congstage[0].sendadd;
+    set<string> destt;
+    for(int i = 0; i < congstage.size(); i++) {
+        destt.insert(congstage[i].destadd);
+    }
+    int togo;
+    for(int i = 0; i < trucks.size(); i++) {
+        if(trucks[i].locationtruck == source) {
+            togo = i;
+            break;
+        }
+    }
+    for(int i = 0; i < trucks.size(); i++) {
+        if(trucks[i].locationtruck == source && trucks[i].time < trucks[togo].time) {
+            togo = i;
+        }
+    }
+    vector<string> loct;
+    loct.push_back(source);
+    for(auto it: destt) {
+        loct.push_back(it);
+    }
+    // loct.push_back(source);
+    int tempdurt = 0;
+    for(int i = 1; i < loct.size(); i++) {
+        double lat1 = citydistance[loct[i-1]].first;
+        double lon1 = citydistance[loct[i-1]].second;
+        double lat2 = citydistance[loct[i]].first;
+        double lon2 = citydistance[loct[i]].second;
+        double distance = distancebetcity(lat1, lon1, lat2, lon2);
+        tempdurt += distance/trucks[togo].speed;
+        trucks[togo].duration += tempdurt;
+        // trucks[togo].locationtruck = loct[i]; //implement imp
+        trucks[togo].locationtruck = loct[i];
+        updatelocationtruck(trucks[togo]);
+        trucks[togo].distance += distance;
+        string desttemp = loct[i];
+        for(int j = 0; j < congstage.size(); j++) {
+            if(congstage[j].destadd == desttemp) {
+                congstage[j].waittime = tempdurt;
+                congstage[j].truckid = trucks[togo].id;
+                congstage[j].status = "delivered";
+            }
+        }
+    }
+    for(int i = 0; i < congstage.size(); i++) {
+        consignmentsdelivered.push_back(congstage[i]);
+    }
+    updatetransactiondb();
+}
+
+void transactmove(consignment c) {
+    string source = c.sendadd;
+    int vol = c.volume;
+    if(loads[source] + int(vol) < 500) {
+        loads[source] += int(vol);
+        consignments.push_back(consignment(c.cid, vol, source, c.destadd));
+    }
+    else if(loads[source] + int(vol) == 500) {
+        loads[source] = 0;
+        consignments.push_back(consignment(c.cid, vol, source, c.destadd));
+        vector<consignment> congstage;
+        vector<consignment> newconsg;
+        // remove all consignment from consignments where object sendadd is source and add it to congstage
+        for(int i = 0; i < consignments.size(); i++) {
+            if(consignments[i].sendadd == source) {
+                congstage.push_back(consignments[i]);
+            }
+            else {
+                newconsg.push_back(consignments[i]);
+            }
+        }
+        consignments = newconsg;
+        transactupdate(congstage); // to implement
+    }
+    else {
+        loads[source] = int(vol);
+        vector<consignment> congstage;
+        vector<consignment> newconsg;
+        // remove all consignment from consignments where object sendadd is source and add it to congstage
+        for(int i = 0; i < consignments.size(); i++) {
+            if(consignments[i].sendadd == source) {
+                congstage.push_back(consignments[i]);
+            }
+            else {
+                newconsg.push_back(consignments[i]);
+            }
+        }
+        consignments = newconsg;
+        consignment topass2(c.cid, vol, source, c.destadd);
+        consignments.push_back(topass2);
+        transactupdate(congstage); // to implement
+        
+    }
 }
 
 void saveinfo() {
@@ -474,17 +628,18 @@ void saveinfo() {
         return;
     }
     for(int i = 0; i < consignments.size(); i++) {
-        consignmentfile<<consignments[i].cid<<","<<consignments[i].volume<<","<<consignments[i].destadd<<","<<consignments[i].sendadd<<","<<consignments[i].charge<<","<<consignments[i].distance<<"\n";
+        consignmentfile<<consignments[i].cid<<","<<consignments[i].volume<<","<<consignments[i].destadd<<","<<consignments[i].sendadd<<","<<consignments[i].charge<<","<<consignments[i].distance<<","<<consignments[i].time<<","<<consignments[i].waittime<<"\n";
     }
 
 
 }
 
-void registerconsignment() {
+void registerconsignment() { // transaction here only
     int id, vol; string source, destination;
     cout<<"Enter id, vol, source, destination\n";
     cin >> id >> vol >> source >> destination;
-    consignments.push_back(consignment(id, vol, source, destination));
+    consignment topass(id, vol, source, destination);
+    transactmove(topass);
     saveinfo();
 }
 
