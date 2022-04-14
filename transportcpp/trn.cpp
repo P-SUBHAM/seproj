@@ -16,7 +16,26 @@ map<string,pair<double,double>> citydistance;
 
 ////////////////////////////////////////////////
 
+
+double toRadians(const double degree);
+double distancebetcity(double lat1, double long1,double lat2, double long2);
+bool authenticate(string usrtype, string username, string password);
+bool authenticatemgr();
+bool authenticateclerk();
+int managermenuinp();
+int clerkmenuinp();
+int loginmenuinp();
+void addtruck();
+void removetruck();
+void printalltrucks();
+void viewconsignment();
+void loadinfo();
 void saveinfo();
+void registerconsignment();
+void managermenu(int choice);
+void clerkmenu(int choice);
+
+////////////////////////////////////////////////
 
 double toRadians(const double degree)
 {
