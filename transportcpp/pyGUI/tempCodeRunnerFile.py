@@ -1,1 +1,1 @@
-os.path.dirname(__file__) + "/../
+os.path.dirname(__file__) + "/../db/transaction.txt"

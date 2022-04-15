@@ -1,5 +1,5 @@
 @ECHO OFF
 cd pyGUI
-python -u "truckgui.py"
+python -u "locgui.py"
 start ""
 EXIT
