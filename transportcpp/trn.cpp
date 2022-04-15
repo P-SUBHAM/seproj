@@ -493,7 +493,7 @@ void updatetransactiondb() {
         return;
     }
     for(int i = 0; i < consignmentsdelivered.size(); i++) {
-        transactionfile<<consignmentsdelivered[i].cid<<","<<consignmentsdelivered[i].volume<<","<<consignmentsdelivered[i].destadd<<","<<consignmentsdelivered[i].sendadd<<","<<consignmentsdelivered[i].charge<<","<<consignmentsdelivered[i].distance<<","<<consignmentsdelivered[i].time<<","<<consignmentsdelivered[i].waittime<<"\n";
+        transactionfile<<consignmentsdelivered[i].cid<<","<<consignmentsdelivered[i].volume<<","<<consignmentsdelivered[i].sendadd<<","<<consignmentsdelivered[i].destadd<<","<<consignmentsdelivered[i].charge<<","<<consignmentsdelivered[i].distance<<","<<consignmentsdelivered[i].time<<","<<consignmentsdelivered[i].waittime<<"\n";
     }
     // for(int i = 0; i < deliveredconsignments.size(); i++) {
     //     transactionfile<<deliveredconsignments[i].id<<","<<deliveredconsignments[i].volume<<","<<deliveredconsignments[i].dest<<","<<deliveredconsignments[i].source<<","<<deliveredconsignments[i].charge<<","<<deliveredconsignments[i].distance<<","<<deliveredconsignments[i].time<<","<<deliveredconsignments[i].waittime<<"\n";
