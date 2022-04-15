@@ -543,7 +543,7 @@ void transactupdate(vector<consignment> congstage) {
         double lat2 = citydistance[loct[i]].first;
         double lon2 = citydistance[loct[i]].second;
         double distance = distancebetcity(lat1, lon1, lat2, lon2);
-        tempdurt += distance/trucks[togo].speed;
+        tempdurt += (distance*60*60.0/trucks[togo].speed);
         trucks[togo].duration += tempdurt;
         // trucks[togo].locationtruck = loct[i]; //implement imp
         trucks[togo].locationtruck = loct[i];
