@@ -487,7 +487,7 @@ void loadinfo() {
 void updatetransactiondb() {
     //copy content of all deliveredconsignments into transaction.txt
     fstream transactionfile;
-    transactionfile.open("db/transaction.txt", ios::out);
+    transactionfile.open("db/transaction.txt", ios::app); // check changed from out to app
     if(!transactionfile) {
         cout<<"File not found transaction 1\n";
         return;

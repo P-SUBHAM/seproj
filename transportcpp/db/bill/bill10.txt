@@ -1,0 +1,5 @@
+Consignment 10
+Volume: 300
+Destination Address: chennai
+Source Address: delhi
+Charge: 106059
