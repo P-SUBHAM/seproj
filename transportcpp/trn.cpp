@@ -638,6 +638,12 @@ void registerconsignment() { // transaction here only
     int id, vol; string source, destination;
     cout<<"Enter id, vol, source, destination\n";
     cin >> id >> vol >> source >> destination;
+    for(int i = 0; i < consignments.size(); i++) {
+        if(consignments[i].cid == id) {
+            cout<<"Consignment already exists\n";
+            return;
+        }
+    }// check if consignment already exists
     consignment topass(id, vol, source, destination);
     transactmove(topass);
     saveinfo();

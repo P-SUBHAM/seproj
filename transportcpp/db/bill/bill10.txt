@@ -1,5 +1,5 @@
 Consignment 10
-Volume: 300
-Destination Address: chennai
-Source Address: delhi
-Charge: 106059
+Volume: 200
+Destination Address: mumbai
+Source Address: chennai
+Charge: 41323
