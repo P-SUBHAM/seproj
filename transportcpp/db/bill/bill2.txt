@@ -1,0 +1,5 @@
+Consignment 2
+Volume: 200
+Destination Address: delhi
+Source Address: chennai
+Charge: 70706

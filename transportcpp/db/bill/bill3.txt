@@ -1,0 +1,5 @@
+Consignment 3
+Volume: 100
+Destination Address: kolkata
+Source Address: mumbai
+Charge: 23134

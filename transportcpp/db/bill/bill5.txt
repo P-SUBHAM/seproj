@@ -1,0 +1,5 @@
+Consignment 5
+Volume: 100
+Destination Address: bhubaneswar
+Source Address: chennai
+Charge: 19926

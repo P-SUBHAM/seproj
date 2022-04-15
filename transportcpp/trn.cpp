@@ -143,7 +143,7 @@ class consignment {
         billfile<<"Charge: "<<charge<<"\n";
         billfile.close();
     }
-    consignment(int i, int vol, string dadd, string sadd, string t = "", string wtt = "") {
+    consignment(int i, int vol,string sadd, string dadd,  string t = "", string wtt = "") {
         cid = i;
         volume = vol;
         destadd = dadd;
@@ -468,13 +468,13 @@ void loadinfo() {
         string cid, vol, dest, source,charge,distance, timev, wttime;
         getline(ss3, cid, ',');
         getline(ss3, vol, ',');
-        getline(ss3, dest, ',');
         getline(ss3, source, ',');
+        getline(ss3, dest, ',');
         getline(ss3, charge, ',');
         getline(ss3, distance, ',');
         getline(ss3, timev, ',');
         getline(ss3, wttime);
-        consignments.push_back(consignment(stoi(cid), stoi(vol), dest, source, timev, wttime));
+        consignments.push_back(consignment(stoi(cid), stoi(vol), source, dest,  timev, wttime));
     }
     /////////////////////////////////// LOAD ///////////////////////////////////////////////
     for(int i = 0; i < consignments.size(); i++) {
@@ -628,7 +628,7 @@ void saveinfo() {
         return;
     }
     for(int i = 0; i < consignments.size(); i++) {
-        consignmentfile<<consignments[i].cid<<","<<consignments[i].volume<<","<<consignments[i].destadd<<","<<consignments[i].sendadd<<","<<consignments[i].charge<<","<<consignments[i].distance<<","<<consignments[i].time<<","<<consignments[i].waittime<<"\n";
+        consignmentfile<<consignments[i].cid<<","<<consignments[i].volume<<","<<consignments[i].sendadd<<","<<consignments[i].destadd<<","<<consignments[i].charge<<","<<consignments[i].distance<<","<<consignments[i].time<<","<<consignments[i].waittime<<"\n";
     }
 
 
@@ -732,4 +732,4 @@ int main()
     return 0;
 }
 
-// LAST MODIFIED: 11/04/2022 10:50
+// LAST MODIFIED: 15/04/2022 12:30
