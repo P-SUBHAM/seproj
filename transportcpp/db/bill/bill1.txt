@@ -1,5 +1,5 @@
 Consignment 1
-Volume: 200
-Destination Address: delhi
-Source Address: mumbai
-Charge: 46129
+Volume: 500
+Destination Address: mumbai
+Source Address: delhi
+Charge: 115324

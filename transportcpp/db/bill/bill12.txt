@@ -1,0 +1,5 @@
+Consignment 12
+Volume: 400
+Destination Address: bhubaneswar
+Source Address: kolkata
+Charge: 28725

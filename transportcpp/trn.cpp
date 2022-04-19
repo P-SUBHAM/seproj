@@ -236,7 +236,7 @@ bool authenticateclerk() {
 }
 
 int managermenuinp() {
-    cout<<"\n\n1. Add truck\n2. Remove truck\n3. Print all trucksv\n4. LOG-OUT!!!\n5. EXIT\n";
+    cout<<"\n\n1. Add truck\n2. Remove truck\n3. Print all trucksv\n4. LOG-OUT!!!\n5. EXIT\n6. MANAGE STATISTICS\n";
     cout<<"\n";
     int choice;
     cin>>choice;
@@ -260,6 +260,10 @@ int managermenuinp() {
         }
         case 5: {
             return 5;
+            break;
+        }
+        case 6: {
+            return 6;
             break;
         }
         default: {
@@ -495,6 +499,10 @@ void updatetransactiondb() {
     for(int i = 0; i < consignmentsdelivered.size(); i++) {
         transactionfile<<consignmentsdelivered[i].cid<<","<<consignmentsdelivered[i].volume<<","<<consignmentsdelivered[i].sendadd<<","<<consignmentsdelivered[i].destadd<<","<<consignmentsdelivered[i].charge<<","<<consignmentsdelivered[i].distance<<","<<consignmentsdelivered[i].time<<","<<consignmentsdelivered[i].waittime<<"\n";
     }
+    // added 20-04-2022
+    transactionfile.close();
+    consignmentsdelivered.clear();
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // for(int i = 0; i < deliveredconsignments.size(); i++) {
     //     transactionfile<<deliveredconsignments[i].id<<","<<deliveredconsignments[i].volume<<","<<deliveredconsignments[i].dest<<","<<deliveredconsignments[i].source<<","<<deliveredconsignments[i].charge<<","<<deliveredconsignments[i].distance<<","<<deliveredconsignments[i].time<<","<<deliveredconsignments[i].waittime<<"\n";
     // }
@@ -649,6 +657,276 @@ void registerconsignment() { // transaction here only
     saveinfo();
 }
 
+void truckstatus() {
+    cout<<"Enter truck id\n";
+    int id;
+    cin >> id;
+    //check if truck id exists or not
+    bool found = false;
+    for(int i = 0; i < trucks.size(); i++) {
+        if(trucks[i].id == id) {
+            found = true; break;
+        }
+    }
+    if(!found) {
+        cout<<"Truck not found\n";
+        return;
+    }
+    vector<pair<string,string>> truckloc;
+    //read location.txt
+    fstream locationfile;
+    locationfile.open("db/location.txt", ios::in);
+    if(!locationfile) {
+        cout<<"File not found location 3\n";
+        return;
+    }
+    string line;
+    while(getline(locationfile, line)) {
+        stringstream ss(line);
+        string truckid;
+        string location;
+        string timeunixv;
+        getline(ss, truckid, ',');
+        getline(ss, location, ',');
+        getline(ss, timeunixv, ',');
+        if(truckid == to_string(id)) {
+            //convert timeunixv to time
+            int timeunix = stoi(timeunixv);
+            time_t t = timeunix;
+            struct tm * timeinfo = localtime(&t);
+            char buffer[80];
+            strftime(buffer, 80, "%d/%m/%Y %I:%M:%S", timeinfo);
+            string timestr(buffer);
+            truckloc.push_back({location, timestr});
+        }
+    }
+    cout<<"Truck id: "<<id<<" STATUS\n";
+    for(int i = 0; i < truckloc.size(); i++) {
+        cout<<"Location: "<<truckloc[i].first<<" Time: "<<truckloc[i].second<<"\n";
+    }
+    cout<<"\n";
+}
+
+void truckusage() {
+    cout<<"Enter truck id\n";
+    int id;
+    cin >> id;
+    //check if truck id exists or not
+    bool found = false;
+    int i = 0;
+    for(; i < trucks.size(); i++) {
+        if(trucks[i].id == id) {
+            found = true; break;
+        }
+    }
+    if(!found) {
+        cout<<"Truck not found\n";
+        return;
+    }
+    truck t = trucks[i];
+    // print duration and distance
+    cout<<"Truck id: "<<id<<" USAGE\n";
+    int duration = t.distance/t.speed;
+    // print duration hours in days and hours 
+    int days = duration/24;
+    int hours = duration%24;
+    cout<<"Duration: "<<days<<" days "<<hours<<" hours\n";
+    
+    cout<<"Distance: "<<t.distance<<" KM\n";
+    cout<<"\n";
+}
+
+void consignmentstatus() {
+    // read consignmentdb.txt and transaction.txt 
+    fstream consignmentfile;
+    consignmentfile.open("db/consignmentdb.txt", ios::in);
+    if(!consignmentfile) {
+        cout<<"File not found consignmentdb 3\n";
+        return;
+    }
+    string line;
+    vector<consignment> consg;
+    while(getline(consignmentfile, line)) {
+        stringstream ss(line);
+        string cid, volume, sendadd, destadd, charge, distance, time, waittime;
+        getline(ss, cid, ',');
+        getline(ss, volume, ',');
+        getline(ss, sendadd, ',');
+        getline(ss, destadd, ',');
+        getline(ss, charge, ',');
+        getline(ss, distance, ',');
+        getline(ss, time, ',');
+        getline(ss, waittime, ',');
+        consignment c(stoi(cid), stoi(volume), sendadd, destadd, time, waittime);
+        consg.push_back(c);
+    }
+    fstream transactionfile;
+    transactionfile.open("db/transaction.txt", ios::in);
+    if(!transactionfile) {
+        cout<<"File not found transaction 3\n";
+        return;
+    }
+    while(getline(transactionfile, line)) {
+        stringstream ss(line);
+        string cid, volume, sendadd, destadd, charge, distance, time, waittime;
+        getline(ss, cid, ',');
+        getline(ss, volume, ',');
+        getline(ss, sendadd, ',');
+        getline(ss, destadd, ',');
+        getline(ss, charge, ',');
+        getline(ss, distance, ',');
+        getline(ss, time, ',');
+        getline(ss, waittime, ',');
+        // string to float distance
+        float distancef = stof(distance);
+        consignment c(stoi(cid), stoi(volume), sendadd, destadd, time, waittime);
+        consg.push_back(c);
+    }
+    cout<<"Consignment STATUS\n";
+    cout<<"Enter consignment id\n";
+    int id;
+    cin >> id;
+    bool found = false;
+    for(int i = 0; i < consg.size(); i++) {
+        if(consg[i].cid == id) {
+            found = true;
+            cout<<"Consignment id: "<<id<<"\n";
+            cout<<"Volume: "<<consg[i].volume<<"\n";
+            cout<<"Source: "<<consg[i].sendadd<<"\n";
+            cout<<"Destination: "<<consg[i].destadd<<"\n";
+            cout<<"Charge: "<<consg[i].charge<<"\n";
+            cout<<"Distance: "<<consg[i].distance<<"\n";
+            // convert time to time_t
+            long long int timesv = consg[i].time;
+            time_t t = timesv;
+            struct tm * timeinfo = localtime(&t);
+
+            char buffer[80];
+            strftime(buffer, 80, "%d/%m/%Y %I:%M:%S", timeinfo);
+            string timestr(buffer);
+            cout<<"Time: "<<timestr<<"\n";
+            //convert waittime in seconds to days and hours and minutes
+            int waittimesv = consg[i].waittime;
+            int waittime = waittimesv/3600;
+            int days = waittime/24;
+            int hours = waittime%24;
+            cout<<"Wait time: "<<days<<" days "<<hours<<" hours "<<waittime%60<<" minutes\n";
+            break;
+        }
+    }
+    if(!found) {
+        cout<<"Consignment not found\n";
+    }
+    cout<<"\n";
+    
+}
+
+void idletime() {
+    // read consignmentdb.txt and transaction.txt 
+    fstream consignmentfile;
+    consignmentfile.open("db/consignmentdb.txt", ios::in);
+    if(!consignmentfile) {
+        cout<<"File not found consignmentdb 3\n";
+        return;
+    }
+    string line;
+    vector<consignment> consg;
+    while(getline(consignmentfile, line)) {
+        stringstream ss(line);
+        string cid, volume, sendadd, destadd, charge, distance, time, waittime;
+        getline(ss, cid, ',');
+        getline(ss, volume, ',');
+        getline(ss, sendadd, ',');
+        getline(ss, destadd, ',');
+        getline(ss, charge, ',');
+        getline(ss, distance, ',');
+        getline(ss, time, ',');
+        getline(ss, waittime, ',');
+        consignment c(stoi(cid), stoi(volume), sendadd, destadd, time, waittime);
+        consg.push_back(c);
+    }
+    fstream transactionfile;
+    transactionfile.open("db/transaction.txt", ios::in);
+    if(!transactionfile) {
+        cout<<"File not found transaction 3\n";
+        return;
+    }
+    while(getline(transactionfile, line)) {
+        stringstream ss(line);
+        string cid, volume, sendadd, destadd, charge, distance, time, waittime;
+        getline(ss, cid, ',');
+        getline(ss, volume, ',');
+        getline(ss, sendadd, ',');
+        getline(ss, destadd, ',');
+        getline(ss, charge, ',');
+        getline(ss, distance, ',');
+        getline(ss, time, ',');
+        getline(ss, waittime, ',');
+        // string to float distance
+        float distancef = stof(distance);
+        consignment c(stoi(cid), stoi(volume), sendadd, destadd, time, waittime);
+        consg.push_back(c);
+    }
+    map<string, int> locationidletime;
+    map<string, int>::iterator it;
+    for(int i = 0; i < consg.size(); i++) {
+        it = locationidletime.find(consg[i].sendadd);
+        if(it == locationidletime.end()) {
+            locationidletime[consg[i].sendadd] = 0;
+        }
+        it = locationidletime.find(consg[i].destadd);
+        if(it == locationidletime.end()) {
+            locationidletime[consg[i].destadd] = 0;
+        }
+    }
+    for(int i = 0; i < consg.size(); i++) {
+        it = locationidletime.find(consg[i].sendadd);
+        locationidletime[consg[i].sendadd] += consg[i].waittime;
+        it = locationidletime.find(consg[i].destadd);
+        locationidletime[consg[i].destadd] += consg[i].waittime;
+    }
+    cout<<"Location IDLE TIME\n";
+    for(it = locationidletime.begin(); it != locationidletime.end(); it++) {
+        string locv = it->first;
+        int idletime = it->second;
+        // print locv and idletime seconds in days and hours and minutes
+        int idletimev = idletime;
+        int idledays = idletimev/86400;
+        int idlehours = idletimev%86400/3600;
+        int idlemins = idletimev%3600/60;
+        cout<<locv<<": "<<idledays<<" days "<<idlehours<<" hours "<<idlemins<<" minutes\n";
+    }
+    cout<<"\n";
+
+}
+
+void managestatistics() {
+    
+    cout<<"1. TRUCK STATUS\n";
+    cout<<"2. TRUCK USAGE\n";
+    cout<<"3. CONSIGNMENT STATUS\n";
+    cout<<"4. IDLE TIME\n";
+    int choice; cin >> choice;
+    switch(choice) {
+        case 1:
+            truckstatus();
+            break;
+        case 2:
+            truckusage();
+            break;
+        case 3:
+            consignmentstatus();
+            break;
+        case 4:
+            idletime();
+            break;
+        default:
+            cout<<"Invalid choice\n";
+            break;
+    }
+    
+}
+
 void managermenu(int choice) {
     switch(choice) {
             case 1: {
@@ -668,6 +946,10 @@ void managermenu(int choice) {
             }
             case 5: {
                 return;
+            }
+            case 6: {
+                managestatistics();
+                break;
             }
             default: {
                 cout<<"Invalid choice\n";
@@ -738,4 +1020,4 @@ int main()
     return 0;
 }
 
-// LAST MODIFIED: 15/04/2022 12:30
+// LAST MODIFIED: 20/04/2022 02:43 AM

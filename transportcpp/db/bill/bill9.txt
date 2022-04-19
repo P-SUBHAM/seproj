@@ -1,5 +1,5 @@
 Consignment 9
 Volume: 255
-Destination Address: kolkata
-Source Address: delhi
+Destination Address: delhi
+Source Address: kolkata
 Charge: 47243
