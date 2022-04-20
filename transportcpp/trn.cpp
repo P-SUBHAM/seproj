@@ -985,11 +985,11 @@ int main()
 {
     loadinfo();
     ////////////    TESTING    ////////////
-    cout<<"-----------------TESTING STARTS------------------\n";
-    for(auto it: citydistance) {
-        cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<"\n";
-    }
-    cout<<"-----------------TESTING ENDS------------------\n";
+    // cout<<"-----------------TESTING STARTS------------------\n";
+    // for(auto it: citydistance) {
+    //     cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<"\n";
+    // }
+    // cout<<"-----------------TESTING ENDS------------------\n";
     ////////////    TESTING    ////////////
     int cno=0; // cno = 0 means login page() auth
     while(cno!=3) {
